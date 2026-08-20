@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Hero } from "./components/Hero";
@@ -15,12 +15,14 @@ import { useReducedMotion } from "./hooks/useReducedMotion";
 import styles from "./App.module.css";
 
 gsap.registerPlugin(ScrollTrigger);
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 export default function App() {
   const reducedMotion = useReducedMotion();
   const [booted, setBooted] = useState(false);
   const heroRef = useRef<HTMLElement | null>(null);
   const live = booted && !reducedMotion;
+  const onBooted = useCallback(() => setBooted(true), []);
 
   useEffect(() => {
     if (reducedMotion) setBooted(true);
@@ -129,9 +131,11 @@ export default function App() {
         duration: 0.9,
         stagger: 0.12,
         ease: "power3.out",
+        immediateRender: false,
         scrollTrigger: {
           trigger: "[data-briefing]",
-          start: "top 75%",
+          start: "top 80%",
+          once: true,
         },
       });
 
@@ -258,19 +262,31 @@ export default function App() {
         duration: 0.8,
         stagger: 0.1,
         ease: "power3.out",
+        immediateRender: false,
         scrollTrigger: {
           trigger: "[data-comms]",
-          start: "top 75%",
+          start: "top 80%",
+          once: true,
         },
       });
     });
 
-    const onResize = () => ScrollTrigger.refresh();
-    window.addEventListener("resize", onResize);
-    requestAnimationFrame(() => ScrollTrigger.refresh());
+    const touch = window.matchMedia("(pointer: coarse)").matches;
+    if (touch) ScrollTrigger.normalizeScroll(true);
+
+    const refresh = () => ScrollTrigger.refresh();
+    const t1 = window.setTimeout(refresh, 120);
+    const t2 = window.setTimeout(refresh, 480);
+    const onOrient = () => window.setTimeout(refresh, 280);
+    window.addEventListener("orientationchange", onOrient);
+    if (!touch) window.addEventListener("resize", refresh);
 
     return () => {
-      window.removeEventListener("resize", onResize);
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+      window.removeEventListener("orientationchange", onOrient);
+      window.removeEventListener("resize", refresh);
+      if (touch) ScrollTrigger.normalizeScroll(false);
       ctx.revert();
     };
   }, [booted, reducedMotion]);
@@ -278,7 +294,7 @@ export default function App() {
   return (
     <div className={styles.app}>
       {!booted && !reducedMotion ? (
-        <Preloader onDone={() => setBooted(true)} />
+        <Preloader onDone={onBooted} />
       ) : null}
       <CustomCursor />
       <ScrollProgress enabled={live} />
