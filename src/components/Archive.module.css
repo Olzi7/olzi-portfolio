@@ -159,7 +159,7 @@
     scroll-padding-inline: 9vw;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    touch-action: pan-x;
+    touch-action: auto;
     padding-block: 0.35rem 0.75rem;
   }
 

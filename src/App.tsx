@@ -39,6 +39,9 @@ export default function App() {
   useEffect(() => {
     if (!booted) return;
 
+    const mobile = window.matchMedia("(max-width: 720px)").matches;
+    const observers: IntersectionObserver[] = [];
+
     const ctx = gsap.context(() => {
       if (reducedMotion) {
         gsap.set("[data-reveal], [data-comms-item]", {
@@ -49,11 +52,24 @@ export default function App() {
         return;
       }
 
-      const mobile = window.matchMedia("(max-width: 720px)").matches;
+      const watch = (el: Element | null, play: () => void) => {
+        if (!el) return;
+        const io = new IntersectionObserver(
+          ([entry]) => {
+            if (!entry.isIntersecting) return;
+            play();
+            io.disconnect();
+          },
+          { threshold: 0.22, rootMargin: "0px 0px -12% 0px" },
+        );
+        io.observe(el);
+        observers.push(io);
+      };
+
       const outline = document.querySelector("[data-hero-outline]");
       const portrait = document.querySelector("[data-hero-portrait]");
 
-      if (outline && portrait && heroRef.current) {
+      if (!mobile && outline && portrait && heroRef.current) {
         gsap.set(outline, { xPercent: -50, yPercent: -50 });
         gsap.to(outline, {
           yPercent: -68,
@@ -65,7 +81,6 @@ export default function App() {
             scrub: true,
           },
         });
-
         gsap.to(portrait, {
           yPercent: -8,
           scale: 1.04,
@@ -86,129 +101,158 @@ export default function App() {
       const mask = document.querySelector<HTMLElement>("[data-pixel-mask]");
 
       if (pixelPin && cells.length) {
-        gsap.to(cells, {
-          opacity: 0,
-          scale: 0.12,
-          ease: "none",
-          stagger: { amount: 0.9, from: "random" },
-          scrollTrigger: {
-            trigger: pixelPin,
-            start: mobile ? "top 75%" : "top top",
-            end: mobile ? "bottom top" : "+=175%",
-            pin: !mobile,
-            scrub: 0.65,
-            anticipatePin: mobile ? 0 : 1,
-            onUpdate: (self) => {
-              const p = self.progress;
-              if (status) {
-                status.textContent =
-                  p < 0.18
-                    ? "ENCRYPTED"
-                    : p < 0.72
-                      ? "DECODING"
-                      : "ACCESS GRANTED";
-              }
-              if (caption) {
-                caption.textContent =
-                  p < 0.18
-                    ? "SIGNAL / LOCKED"
-                    : p < 0.72
-                      ? "SIGNAL / DECODE"
-                      : "SIGNAL / OPEN";
-              }
-              if (mask) {
-                mask.style.opacity =
-                  p > 0.9 ? String(Math.max(0, 1 - (p - 0.9) / 0.1)) : "1";
-              }
+        const revealPixel = (p: number) => {
+          if (status) {
+            status.textContent =
+              p < 0.18 ? "ENCRYPTED" : p < 0.72 ? "DECODING" : "ACCESS GRANTED";
+          }
+          if (caption) {
+            caption.textContent =
+              p < 0.18
+                ? "SIGNAL / LOCKED"
+                : p < 0.72
+                  ? "SIGNAL / DECODE"
+                  : "SIGNAL / OPEN";
+          }
+          if (mask) {
+            mask.style.opacity =
+              p > 0.9 ? String(Math.max(0, 1 - (p - 0.9) / 0.1)) : "1";
+          }
+        };
+
+        if (mobile) {
+          watch(pixelPin, () => {
+            const tl = gsap.timeline({
+              onUpdate: () => revealPixel(tl.progress()),
+            });
+            tl.to(cells, {
+              opacity: 0,
+              scale: 0.12,
+              ease: "power2.out",
+              duration: 0.7,
+              stagger: { amount: 0.85, from: "random" },
+            });
+            if (mask) tl.to(mask, { opacity: 0, duration: 0.35 }, "-=0.15");
+          });
+        } else {
+          gsap.to(cells, {
+            opacity: 0,
+            scale: 0.12,
+            ease: "none",
+            stagger: { amount: 0.9, from: "random" },
+            scrollTrigger: {
+              trigger: pixelPin,
+              start: "top top",
+              end: "+=175%",
+              pin: true,
+              scrub: 0.65,
+              anticipatePin: 1,
+              onUpdate: (self) => revealPixel(self.progress),
             },
+          });
+        }
+      }
+
+      const briefing = document.querySelector("[data-briefing]");
+      if (mobile) {
+        watch(briefing, () => {
+          gsap.from("[data-reveal]", {
+            y: 28,
+            opacity: 0,
+            duration: 0.7,
+            stagger: 0.1,
+            ease: "power3.out",
+          });
+        });
+      } else {
+        gsap.from("[data-reveal]", {
+          y: 36,
+          opacity: 0,
+          duration: 0.9,
+          stagger: 0.12,
+          ease: "power3.out",
+          immediateRender: false,
+          scrollTrigger: {
+            trigger: "[data-briefing]",
+            start: "top 80%",
+            once: true,
           },
         });
       }
-
-      gsap.from("[data-reveal]", {
-        y: 36,
-        opacity: 0,
-        duration: 0.9,
-        stagger: 0.12,
-        ease: "power3.out",
-        immediateRender: false,
-        scrollTrigger: {
-          trigger: "[data-briefing]",
-          start: "top 80%",
-          once: true,
-        },
-      });
 
       const splitPin = document.querySelector<HTMLElement>("[data-split-pin]");
       const beam = document.querySelector<HTMLElement>("[data-split-beam]");
       const brand = document.querySelector<HTMLElement>("[data-split-brand]");
       const gfx = document.querySelector<HTMLElement>("[data-split-gfx]");
       const splitStatus = document.querySelector("[data-split-status]");
+      const webWord = document.querySelector<HTMLElement>("[data-split-web] h2");
 
       if (splitPin && beam && brand && gfx) {
         gsap.set(brand, { opacity: 0.3 });
         gsap.set(gfx, { opacity: 0.18 });
 
-        const webWord = document.querySelector<HTMLElement>("[data-split-web] h2");
-        if (webWord) {
-          const dim = {
-            color: "rgba(245, 245, 245, 0.22)",
-            textShadow: "0 0 0 rgba(255, 72, 146, 0)",
-          };
-          const lit = {
-            color: "#ff4892",
-            textShadow: "0 0 24px rgba(255, 72, 146, 0.45)",
-          };
-          gsap.set(webWord, dim);
+        const dim = {
+          color: "rgba(245, 245, 245, 0.22)",
+          textShadow: "0 0 0 rgba(255, 72, 146, 0)",
+        };
+        const lit = {
+          color: "#ff4892",
+          textShadow: "0 0 24px rgba(255, 72, 146, 0.45)",
+        };
+        if (webWord) gsap.set(webWord, dim);
 
-          const flicker = gsap.timeline({
-            paused: true,
-            defaults: { ease: "none" },
-          });
+        const flickerWeb = () => {
+          if (!webWord) return;
+          const flicker = gsap.timeline({ defaults: { ease: "none" } });
           flicker.to(webWord, { ...lit, duration: 0.08 });
           flicker.to(webWord, { ...lit, duration: 0.18 });
           flicker.to(webWord, { ...dim, duration: 0.08 });
           flicker.to(webWord, { ...dim, duration: 0.2 });
           flicker.to(webWord, { ...lit, duration: 0.14, ease: "power2.out" });
+        };
 
-          ScrollTrigger.create({
-            trigger: splitPin,
-            start: "top 52%",
-            once: true,
-            onEnter: () => flicker.play(0),
+        if (mobile) {
+          watch(splitPin, () => {
+            flickerWeb();
+            gsap.to(beam, { scaleX: 1, duration: 0.55, ease: "power2.out" });
+            gsap.to(brand, { opacity: 1, duration: 0.4, delay: 0.2 });
+            gsap.to(gfx, { opacity: 1, duration: 0.4, delay: 0.4 });
+            if (splitStatus) splitStatus.textContent = "CLEARANCE · FULL ACCESS";
           });
-        }
+        } else {
+          if (webWord) {
+            ScrollTrigger.create({
+              trigger: splitPin,
+              start: "top 52%",
+              once: true,
+              onEnter: flickerWeb,
+            });
+          }
 
-        const splitTl = gsap.timeline({
-          scrollTrigger: {
-            trigger: splitPin,
-            start: "top top",
-            end: mobile ? "+=50%" : "+=150%",
-            pin: !mobile,
-            scrub: 0.7,
-            anticipatePin: 1,
-            onUpdate: (self) => {
-              if (!splitStatus) return;
-              const p = self.progress;
-              splitStatus.textContent =
-                p < 0.28
-                  ? "CLEARANCE · WEB LOCKED"
-                  : p < 0.64
-                    ? "CLEARANCE · BRAND ONLINE"
-                    : "CLEARANCE · FULL ACCESS";
+          const splitTl = gsap.timeline({
+            scrollTrigger: {
+              trigger: splitPin,
+              start: "top top",
+              end: "+=150%",
+              pin: true,
+              scrub: 0.7,
+              anticipatePin: 1,
+              onUpdate: (self) => {
+                if (!splitStatus) return;
+                const p = self.progress;
+                splitStatus.textContent =
+                  p < 0.28
+                    ? "CLEARANCE · WEB LOCKED"
+                    : p < 0.64
+                      ? "CLEARANCE · BRAND ONLINE"
+                      : "CLEARANCE · FULL ACCESS";
+              },
             },
-          },
-        });
-
-        splitTl.to(
-          beam,
-          mobile
-            ? { scaleX: 1, ease: "none", duration: 0.45 }
-            : { scaleY: 1, ease: "none", duration: 0.45 },
-          0,
-        );
-        splitTl.to(brand, { opacity: 1, duration: 0.22 }, 0.3);
-        splitTl.to(gfx, { opacity: 1, duration: 0.22 }, 0.58);
+          });
+          splitTl.to(beam, { scaleY: 1, ease: "none", duration: 0.45 }, 0);
+          splitTl.to(brand, { opacity: 1, duration: 0.22 }, 0.3);
+          splitTl.to(gfx, { opacity: 1, duration: 0.22 }, 0.58);
+        }
       }
 
       const track = document.querySelector<HTMLElement>("[data-archive-track]");
@@ -256,37 +300,47 @@ export default function App() {
         });
       }
 
-      gsap.from("[data-comms-item]", {
-        y: 28,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.1,
-        ease: "power3.out",
-        immediateRender: false,
-        scrollTrigger: {
-          trigger: "[data-comms]",
-          start: "top 80%",
-          once: true,
-        },
-      });
+      const comms = document.querySelector("[data-comms]");
+      if (mobile) {
+        watch(comms, () => {
+          gsap.from("[data-comms-item]", {
+            y: 22,
+            opacity: 0,
+            duration: 0.65,
+            stagger: 0.08,
+            ease: "power3.out",
+          });
+        });
+      } else {
+        gsap.from("[data-comms-item]", {
+          y: 28,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.1,
+          ease: "power3.out",
+          immediateRender: false,
+          scrollTrigger: {
+            trigger: "[data-comms]",
+            start: "top 80%",
+            once: true,
+          },
+        });
+      }
     });
-
-    const touch = window.matchMedia("(pointer: coarse)").matches;
-    if (touch) ScrollTrigger.normalizeScroll(true);
 
     const refresh = () => ScrollTrigger.refresh();
     const t1 = window.setTimeout(refresh, 120);
     const t2 = window.setTimeout(refresh, 480);
     const onOrient = () => window.setTimeout(refresh, 280);
     window.addEventListener("orientationchange", onOrient);
-    if (!touch) window.addEventListener("resize", refresh);
+    if (!mobile) window.addEventListener("resize", refresh);
 
     return () => {
+      observers.forEach((io) => io.disconnect());
       window.clearTimeout(t1);
       window.clearTimeout(t2);
       window.removeEventListener("orientationchange", onOrient);
       window.removeEventListener("resize", refresh);
-      if (touch) ScrollTrigger.normalizeScroll(false);
       ctx.revert();
     };
   }, [booted, reducedMotion]);
