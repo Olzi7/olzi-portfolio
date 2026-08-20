@@ -11,30 +11,22 @@ import { Preloader } from "./components/Preloader";
 import { CustomCursor } from "./components/CustomCursor";
 import { ScrollProgress } from "./components/ScrollProgress";
 import { useLenis } from "./hooks/useLenis";
-import { useReducedMotion } from "./hooks/useReducedMotion";
 import styles from "./App.module.css";
 
 gsap.registerPlugin(ScrollTrigger);
 ScrollTrigger.config({ ignoreMobileResize: true });
 
 export default function App() {
-  const reducedMotion = useReducedMotion();
   const [booted, setBooted] = useState(false);
   const heroRef = useRef<HTMLElement | null>(null);
-  const live = booted && !reducedMotion;
   const onBooted = useCallback(() => setBooted(true), []);
 
   useEffect(() => {
-    if (reducedMotion) setBooted(true);
-  }, [reducedMotion]);
-
-  useEffect(() => {
-    const booting = !booted && !reducedMotion;
-    document.documentElement.classList.toggle("is-booting", booting);
+    document.documentElement.classList.toggle("is-booting", !booted);
     return () => document.documentElement.classList.remove("is-booting");
-  }, [booted, reducedMotion]);
+  }, [booted]);
 
-  useLenis(live);
+  useLenis(booted);
 
   useEffect(() => {
     if (!booted) return;
@@ -43,15 +35,6 @@ export default function App() {
     const observers: IntersectionObserver[] = [];
 
     const ctx = gsap.context(() => {
-      if (reducedMotion) {
-        gsap.set("[data-reveal], [data-comms-item]", {
-          clearProps: "all",
-          opacity: 1,
-          y: 0,
-        });
-        return;
-      }
-
       const watch = (el: Element | null, play: () => void) => {
         if (!el) return;
         const io = new IntersectionObserver(
@@ -60,7 +43,7 @@ export default function App() {
             play();
             io.disconnect();
           },
-          { threshold: 0.22, rootMargin: "0px 0px -12% 0px" },
+          { threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
         );
         io.observe(el);
         observers.push(io);
@@ -214,7 +197,12 @@ export default function App() {
         if (mobile) {
           watch(splitPin, () => {
             flickerWeb();
-            gsap.to(beam, { scaleX: 1, duration: 0.55, ease: "power2.out" });
+            gsap.to(beam, {
+              scaleX: 1,
+              scaleY: 1,
+              duration: 0.55,
+              ease: "power2.out",
+            });
             gsap.to(brand, { opacity: 1, duration: 0.4, delay: 0.2 });
             gsap.to(gfx, { opacity: 1, duration: 0.4, delay: 0.4 });
             if (splitStatus) splitStatus.textContent = "CLEARANCE · FULL ACCESS";
@@ -343,19 +331,19 @@ export default function App() {
       window.removeEventListener("resize", refresh);
       ctx.revert();
     };
-  }, [booted, reducedMotion]);
+  }, [booted]);
 
   return (
     <div className={styles.app}>
-      {!booted && !reducedMotion ? (
+      {!booted ? (
         <Preloader onDone={onBooted} />
       ) : null}
       <CustomCursor />
-      <ScrollProgress enabled={live} />
+      <ScrollProgress enabled={booted} />
       <a className={styles.skip} href="#decode">
         Skip to content
       </a>
-      <Hero heroRef={heroRef} />
+      <Hero heroRef={heroRef} reveal={booted} />
       <PixelBridge />
       <Briefing />
       <SplitField />

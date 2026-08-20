@@ -137,14 +137,3 @@
     grid-template-rows: repeat(16, 1fr);
   }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .pin {
-    height: auto;
-    min-height: 100vh;
-  }
-
-  .mask {
-    display: none;
-  }
-}

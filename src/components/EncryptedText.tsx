@@ -20,12 +20,6 @@ export function EncryptedText({ text, className, active = true }: Props) {
       return;
     }
 
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) {
-      el.textContent = text;
-      return;
-    }
-
     let frame = 0;
     let cancelled = false;
     const duration = Math.max(36, Math.round(text.length * 1.15));

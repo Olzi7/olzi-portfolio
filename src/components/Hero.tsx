@@ -1,23 +1,50 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
+import gsap from "gsap";
 import { useClock } from "../hooks/useClock";
 import { Magnetic } from "./Magnetic";
 import styles from "./Hero.module.css";
 
 type HeroProps = {
   heroRef: RefObject<HTMLElement | null>;
+  reveal?: boolean;
 };
 
-export function Hero({ heroRef }: HeroProps) {
+export function Hero({ heroRef, reveal = false }: HeroProps) {
   const time = useClock();
   const tiltRef = useRef<HTMLDivElement>(null);
   const [egg, setEgg] = useState(false);
   const clicks = useRef(0);
 
   useEffect(() => {
+    if (!reveal || !heroRef.current) return;
+    const ctx = gsap.context(() => {
+      gsap.from("[data-hero-in]", {
+        y: 28,
+        opacity: 0,
+        duration: 0.75,
+        stagger: 0.1,
+        ease: "power3.out",
+      });
+      gsap.from("[data-hero-outline]", {
+        opacity: 0,
+        duration: 0.9,
+        ease: "power3.out",
+      });
+      gsap.from("[data-hero-portrait]", {
+        y: 36,
+        opacity: 0,
+        duration: 0.85,
+        delay: 0.12,
+        ease: "power3.out",
+      });
+    }, heroRef);
+    return () => ctx.revert();
+  }, [reveal, heroRef]);
+
+  useEffect(() => {
     const el = tiltRef.current;
     const fine = window.matchMedia("(pointer: fine)").matches;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!el || !fine || reduced) return;
+    if (!el || !fine) return;
 
     const onMove = (e: MouseEvent) => {
       const rect = el.getBoundingClientRect();
@@ -45,7 +72,7 @@ export function Hero({ heroRef }: HeroProps) {
 
   return (
     <section className={styles.hero} ref={heroRef} id="top" aria-label="Hero">
-      <div className={styles.hudTop}>
+      <div className={styles.hudTop} data-hero-in>
         <span className={styles.hudLabel}>SEMENOVA</span>
         <span className={styles.hudMark} aria-hidden="true" />
         <span className={styles.hudClock} aria-live="polite">
@@ -55,13 +82,15 @@ export function Hero({ heroRef }: HeroProps) {
 
       <div className={styles.main}>
         <div className={styles.copy}>
-          <p className={styles.kicker}>WEB FIRST</p>
-          <h1 className={styles.headline}>
+          <p className={styles.kicker} data-hero-in>
+            WEB FIRST
+          </p>
+          <h1 className={styles.headline} data-hero-in>
             <span className={styles.solid}>Сайты.</span>
             <span className={styles.outlineWord}>Которые</span>
             <span className={styles.outlineWord}>запоминают.</span>
           </h1>
-          <div className={styles.actions}>
+          <div className={styles.actions} data-hero-in>
             <Magnetic>
               <a
                 className={styles.primary}
@@ -106,7 +135,7 @@ export function Hero({ heroRef }: HeroProps) {
         </div>
       </div>
 
-      <div className={styles.hudBottom}>
+      <div className={styles.hudBottom} data-hero-in>
         <button
           type="button"
           className={styles.hearts}

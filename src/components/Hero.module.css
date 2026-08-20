@@ -341,10 +341,3 @@
     min-width: 12rem;
   }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .hudMark,
-  .hearts span {
-    animation: none;
-  }
-}

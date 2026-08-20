@@ -148,18 +148,3 @@
     color: var(--pink);
   }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .pin {
-    height: auto;
-    min-height: 100vh;
-  }
-
-  .beam {
-    transform: none;
-  }
-
-  .word {
-    color: var(--text);
-  }
-}

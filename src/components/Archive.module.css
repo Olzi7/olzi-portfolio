@@ -200,27 +200,3 @@
     color: rgba(255, 255, 255, 0.35);
   }
 }
-
-@media (prefers-reduced-motion: reduce) and (min-width: 768px) {
-  .pin {
-    overflow: visible;
-  }
-
-  .track {
-    flex-wrap: wrap;
-    flex-direction: row;
-    width: 100%;
-    max-width: var(--max);
-    margin: 0 auto;
-    padding-inline: var(--pad);
-    transform: none !important;
-  }
-
-  .card {
-    flex: 1 1 260px;
-  }
-
-  .hint {
-    display: none;
-  }
-}
