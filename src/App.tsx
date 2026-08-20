@@ -91,11 +91,11 @@ export default function App() {
           stagger: { amount: 0.9, from: "random" },
           scrollTrigger: {
             trigger: pixelPin,
-            start: "top top",
-            end: mobile ? "+=110%" : "+=175%",
-            pin: true,
+            start: mobile ? "top 75%" : "top top",
+            end: mobile ? "bottom top" : "+=175%",
+            pin: !mobile,
             scrub: 0.65,
-            anticipatePin: 1,
+            anticipatePin: mobile ? 0 : 1,
             onUpdate: (self) => {
               const p = self.progress;
               if (status) {

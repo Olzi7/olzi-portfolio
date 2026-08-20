@@ -8,6 +8,7 @@ gsap.registerPlugin(ScrollTrigger);
 export function useLenis(enabled = true) {
   useEffect(() => {
     if (!enabled) return;
+    if (window.matchMedia("(pointer: coarse)").matches) return;
 
     const lenis = new Lenis({
       duration: 1.15,
