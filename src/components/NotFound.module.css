@@ -1,0 +1,230 @@
+.page {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: clip;
+  background: #000;
+  color: #fff;
+  user-select: none;
+  touch-action: none;
+}
+
+.matrix,
+.game,
+.fx {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.matrix {
+  opacity: 0.32;
+  pointer-events: none;
+}
+
+.game {
+  z-index: 1;
+}
+
+.fx {
+  z-index: 4;
+  pointer-events: none;
+}
+
+.ghost {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  z-index: 1;
+  margin: 0;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display);
+  font-size: clamp(7rem, 28vw, 16rem);
+  font-weight: 900;
+  line-height: 0.75;
+  letter-spacing: 0.1em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255, 72, 146, 0.22);
+  pointer-events: none;
+  user-select: none;
+}
+
+.hud {
+  position: relative;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: calc(1.25rem + env(safe-area-inset-top, 0px)) var(--pad) 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  color: var(--pink);
+  text-shadow: var(--pink-glow);
+  font-variant-numeric: tabular-nums;
+}
+
+.hud span:last-child {
+  justify-self: end;
+}
+
+.mark {
+  width: 0.55rem;
+  height: 0.55rem;
+  background: var(--pink);
+  box-shadow: var(--pink-glow);
+}
+
+.copy {
+  position: relative;
+  z-index: 5;
+  display: grid;
+  justify-items: start;
+  gap: 0.4rem;
+  padding: 1.35rem var(--pad) 0;
+  pointer-events: none;
+}
+
+.code {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: clamp(1.05rem, 3.2vw, 1.45rem);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+.sub {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+}
+
+.fail {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  z-index: 5;
+  margin: 0;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.28em;
+  color: var(--pink);
+  text-shadow: var(--pink-glow);
+  pointer-events: none;
+}
+
+.deal {
+  position: absolute;
+  left: 50%;
+  top: 18%;
+  z-index: 6;
+  width: min(26rem, calc(100% - 2.5rem));
+  transform: translateX(-50%);
+  text-align: center;
+  pointer-events: none;
+  animation: dealIn 0.7s ease-out;
+}
+
+.dealTitle {
+  margin: 0 0 0.45rem;
+  font-family: var(--font-mono);
+  font-size: clamp(1.05rem, 3.4vw, 1.55rem);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background: linear-gradient(
+    100deg,
+    #ff4892 0%,
+    #7ad7ff 25%,
+    #fff 50%,
+    #ffe68c 75%,
+    #ff4892 100%
+  );
+  background-size: 220% 100%;
+  animation: holo 3.2s linear infinite;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 18px rgba(122, 215, 255, 0.35));
+}
+
+.dealCode {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  letter-spacing: 0.42em;
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 0 22px rgba(255, 255, 255, 0.45);
+}
+
+.hint {
+  position: absolute;
+  left: 50%;
+  top: calc(58% + 1.35rem);
+  z-index: 5;
+  margin: 0;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  color: rgba(255, 255, 255, 0.38);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.hint:empty {
+  display: none;
+}
+
+.back {
+  position: absolute;
+  left: 50%;
+  bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  z-index: 5;
+  color: var(--pink);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-shadow: var(--pink-glow);
+  transform: translateX(-50%);
+}
+
+.back:hover {
+  color: #fff;
+}
+
+@keyframes holo {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes dealIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .matrix,
+  .fx {
+    display: none;
+  }
+
+  .deal,
+  .dealTitle {
+    animation: none;
+  }
+}

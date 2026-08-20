@@ -1,0 +1,150 @@
+.section {
+  position: relative;
+  background: #000;
+}
+
+.pin {
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  display: grid;
+  place-items: center;
+  overflow: clip;
+  background: #000;
+}
+
+.reveal {
+  position: relative;
+  z-index: 1;
+  width: min(920px, calc(100% - 2 * var(--pad)));
+  padding: var(--pad);
+  text-align: center;
+}
+
+.status {
+  margin: 0 0 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.32em;
+  color: var(--pink);
+}
+
+.title {
+  margin: 0 0 1.25rem;
+  font-family: var(--font-mono);
+  font-size: clamp(2rem, 6.5vw, 4.2rem);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  font-weight: 600;
+}
+
+.title span {
+  color: var(--pink);
+}
+
+.body {
+  margin: 0 auto 2rem;
+  max-width: 34rem;
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+.chips {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chips li {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.9rem 0.75rem;
+  border: 1px solid rgba(255, 72, 146, 0.35);
+  background: rgba(255, 72, 146, 0.06);
+  text-align: left;
+}
+
+.chips strong {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  color: var(--pink);
+}
+
+.chips span {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.mask {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(20, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  gap: 3px;
+  padding: 3px;
+  background: #000;
+}
+
+.cell {
+  background: var(--pink);
+  transform-origin: center;
+}
+
+.cell:nth-child(3n) {
+  background: #c4126e;
+}
+
+.cell:nth-child(7n) {
+  background: #ff7ab0;
+}
+
+.caption {
+  position: relative;
+  z-index: 3;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: clamp(0.75rem, 2vw, 1rem);
+  letter-spacing: 0.4em;
+  color: rgba(255, 255, 255, 0.85);
+  mix-blend-mode: difference;
+}
+
+@media (max-width: 760px) {
+  .chips {
+    grid-template-columns: 1fr;
+  }
+
+  .grid {
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(16, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pin {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .mask {
+    display: none;
+  }
+}

@@ -1,0 +1,165 @@
+.section {
+  position: relative;
+}
+
+.pin {
+  height: 100vh;
+  height: 100dvh;
+  display: grid;
+  align-content: center;
+  gap: 2rem;
+  padding: var(--pad);
+  background:
+    radial-gradient(
+      ellipse 50% 40% at 50% 50%,
+      rgba(255, 72, 146, 0.08),
+      transparent 60%
+    ),
+    #000;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.label {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.3em;
+  color: var(--pink);
+  text-align: center;
+}
+
+.label span {
+  opacity: 0.65;
+  margin-right: 0.65rem;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1.15fr auto 1fr;
+  gap: clamp(1rem, 3vw, 2.5rem);
+  align-items: center;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.stack {
+  display: grid;
+  gap: 2rem;
+}
+
+.side {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.code {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+}
+
+.word {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: clamp(3.2rem, 10vw, 6.4rem);
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  color: rgba(245, 245, 245, 0.28);
+}
+
+.primary .word {
+  font-size: clamp(4rem, 12vw, 7.2rem);
+  color: var(--pink);
+  text-shadow: var(--pink-glow);
+}
+
+.note {
+  margin: 0;
+  max-width: 22rem;
+  color: var(--muted);
+  line-height: 1.45;
+  font-size: clamp(0.88rem, 1.5vw, 1.02rem);
+}
+
+.rail {
+  position: relative;
+  width: 2px;
+  height: min(48vh, 360px);
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.beam {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--pink);
+  box-shadow: 0 0 24px rgba(255, 72, 146, 0.55);
+  transform-origin: top center;
+  transform: scaleY(0);
+}
+
+.status {
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.24em;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+@media (max-width: 720px) {
+  .pin {
+    height: auto;
+    min-height: 100vh;
+    gap: 1.5rem;
+    padding-block: 4rem;
+  }
+
+  .row {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .rail {
+    width: 100%;
+    height: 2px;
+  }
+
+  .beam {
+    transform-origin: left center;
+    transform: scaleX(0);
+  }
+
+  .word,
+  .primary .word {
+    color: var(--text);
+    font-size: clamp(3rem, 18vw, 4.5rem);
+    text-shadow: none;
+  }
+
+  .primary .word {
+    color: var(--pink);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pin {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .beam {
+    transform: none;
+  }
+
+  .word {
+    color: var(--text);
+  }
+}

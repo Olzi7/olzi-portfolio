@@ -1,0 +1,14 @@
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.cursor
+debug-*.log
+*.txt
+_v1_restore/
+_exact_v1_*
+_recovered_*
+_run-build-status.ps1
